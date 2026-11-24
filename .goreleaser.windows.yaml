@@ -26,6 +26,9 @@ archives:
       - scripts/setup.ps1
       - src: third_party/vosk/*.dll
         strip_parent: true
+      - src: third_party/bundle/amd64/models/**/*
+        dst: models
+        strip_parent: false
 
 checksum:
   name_template: "checksums_windows.txt"

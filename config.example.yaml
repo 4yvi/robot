@@ -3,7 +3,10 @@ wake_word: "робот"
 mic_device: ""            # empty = system default; see `robot devices`
 speaker_device: ""
 vosk_model_path: "models/vosk-model-small-ru"
-whisper_url: "http://127.0.0.1:8080"
+whisper_url: "http://127.0.0.1:8080"   # robot starts whisper-server itself when this is a local address
+whisper_server_path: "models/whisper/whisper-server"   # .exe on Windows
+whisper_model_path: "models/whisper/ggml-small.bin"    # downloaded on first run if missing
+whisper_model_url: "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin"
 lmstudio_url: "http://localhost:1234/v1"
 model_name: ""            # pick from the tray menu or set a model id from /v1/models
 piper_path: "models/piper/piper"

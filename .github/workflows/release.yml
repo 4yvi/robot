@@ -48,6 +48,15 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - name: Bundle models and helpers
+        shell: bash
+        run: |
+          if [ "${{ matrix.os }}" = windows-latest ]; then
+            bash scripts/bundle-assets.sh windows amd64 third_party/bundle/amd64
+          else
+            bash scripts/bundle-assets.sh macos arm64 third_party/bundle/arm64
+            bash scripts/bundle-assets.sh macos amd64 third_party/bundle/amd64
+          fi
       - name: Fetch libvosk
         shell: bash
         run: bash scripts/fetch-libvosk.sh

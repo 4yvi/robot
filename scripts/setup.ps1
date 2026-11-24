@@ -40,10 +40,7 @@ if ((Test-Path "third_party\vosk\libvosk.dll") -and -not (Test-Path "third_party
 
 Write-Host "==> whisper.cpp server"
 if (-not (Test-Path "$Models\whisper\whisper-server.exe")) {
-    $rel = Invoke-RestMethod "https://api.github.com/repos/ggml-org/whisper.cpp/releases/latest"
-    $asset = $rel.assets | Where-Object { $_.name -eq "whisper-bin-x64.zip" } | Select-Object -First 1
-    if (-not $asset) { throw "whisper-bin-x64.zip not found in the latest release; download whisper-server manually." }
-    Get-File $asset.browser_download_url "$Models\whisper.zip"
+    Get-File "https://github.com/ggml-org/whisper.cpp/releases/download/b5130/whisper-bin-x64.zip" "$Models\whisper.zip"
     Expand-Archive "$Models\whisper.zip" -DestinationPath "$Models\whisper-tmp" -Force
     New-Item -ItemType Directory -Force -Path "$Models\whisper" | Out-Null
     Get-ChildItem "$Models\whisper-tmp" -Recurse -File | Copy-Item -Destination "$Models\whisper" -Force

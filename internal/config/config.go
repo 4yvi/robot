@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sync"
 
 	"gopkg.in/yaml.v3"
@@ -17,6 +18,9 @@ type Config struct {
 	SpeakerDevice         string            `yaml:"speaker_device"`
 	VoskModelPath         string            `yaml:"vosk_model_path"`
 	WhisperURL            string            `yaml:"whisper_url"`
+	WhisperServerPath     string            `yaml:"whisper_server_path"`
+	WhisperModelPath      string            `yaml:"whisper_model_path"`
+	WhisperModelURL       string            `yaml:"whisper_model_url"`
 	LMStudioURL           string            `yaml:"lmstudio_url"`
 	ModelName             string            `yaml:"model_name"`
 	PiperPath             string            `yaml:"piper_path"`
@@ -44,8 +48,11 @@ func Default() *Config {
 		WakeWord:              "робот",
 		VoskModelPath:         "models/vosk-model-small-ru",
 		WhisperURL:            "http://127.0.0.1:8080",
+		WhisperServerPath:     "models/whisper/whisper-server" + exeSuffix(),
+		WhisperModelPath:      "models/whisper/ggml-small.bin",
+		WhisperModelURL:       "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin",
 		LMStudioURL:           "http://localhost:1234/v1",
-		PiperPath:             "models/piper/piper",
+		PiperPath:             "models/piper/piper" + exeSuffix(),
 		PiperVoice:            "models/piper/ru_RU-irina-medium.onnx",
 		PromptPath:            "prompt.md",
 		SilenceMS:             1200,
@@ -57,6 +64,13 @@ func Default() *Config {
 		StopPhrases:           []string{"хватит", "пока", "стоп"},
 		Apps:                  map[string]string{},
 	}
+}
+
+func exeSuffix() string {
+	if runtime.GOOS == "windows" {
+		return ".exe"
+	}
+	return ""
 }
 
 // Dir returns the per-user data directory (config, logs, database).

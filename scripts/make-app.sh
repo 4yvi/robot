@@ -10,6 +10,9 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN" "$APP/Contents/MacOS/robot"
 sed "s/__VERSION__/$VERSION/g" "$ROOT/packaging/macos/Info.plist" > "$APP/Contents/Info.plist"
 cp "$ROOT/prompt.md" "$ROOT/config.example.yaml" "$APP/Contents/Resources/"
+# Bundle models and helper programs prepared by bundle-assets.sh, if present.
+ASSETS="${ASSETS_DIR:-$ROOT/third_party/bundle/$ARCH}"
+[ -d "$ASSETS/models" ] && cp -R "$ASSETS/models" "$APP/Contents/Resources/models"
 # Bundle libvosk next to the executable so the app runs without extra setup.
 LIBVOSK="${LIBVOSK:-$ROOT/third_party/vosk/libvosk.dylib}"
 if [ -f "$LIBVOSK" ]; then

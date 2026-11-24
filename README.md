@@ -36,27 +36,20 @@ Details: [docs/architecture.md](docs/architecture.md).
 
 ## Installation
 
+### Quick start (release builds)
+1. Install [LM Studio](https://lmstudio.ai), load a model and start its local server.
+2. Download the archive for your system from [Releases](https://github.com/4yvi/robot/releases): `Robot_*_macos_*.zip` (unzip and open `Robot.app`) or `robot_*_windows_amd64.zip` (unzip and run `robot.exe`).
+3. On the first run Robot downloads the large speech recognition model (about 470 MB) and starts `whisper-server` itself. It tells you by voice when it is ready, then say **«робот»**.
+
+The Vosk model, Piper with a Russian voice and whisper-server are already inside the archive. macOS may ask for microphone access; allow it. If macOS blocks the unsigned app, right-click it and choose Open.
+
 ### From source
 ```sh
 git clone https://github.com/4yvi/robot && cd robot
-# macOS
-bash scripts/setup.sh
-# Windows (PowerShell)
-powershell -ExecutionPolicy Bypass -File scripts/setup.ps1
-```
-The setup script downloads the Vosk model and library, whisper.cpp and its model, Piper and a Russian voice into `models/` and creates `config.yaml`.
-
-Build with Vosk enabled:
-```sh
+bash scripts/setup.sh        # macOS (needs cmake); Windows: powershell -File scripts/setup.ps1
 CGO_CPPFLAGS=-I$PWD/third_party/vosk CGO_LDFLAGS=-L$PWD/third_party/vosk go build -tags vosk -o robot ./cmd/robot
 ```
-On Windows add `-ldflags "-H=windowsgui"` and `-lvosk`. For macOS, `bash scripts/make-app.sh ./robot 0.1.0 $(uname -m)` produces `dist/app/<arch>/Robot.app` (required for microphone access).
-
-### Run
-1. Start whisper-server (the setup script prints the command).
-2. Start LM Studio's local server and load a model.
-3. Run `robot` (or open `Robot.app`). Pick the model from the tray menu.
-4. Say **«робот»**.
+On Windows add `-ldflags "-H=windowsgui"` and `-lvosk`. `bash scripts/make-app.sh ./robot 0.1.0 $(uname -m)` builds `Robot.app` (needed for microphone access on macOS).
 
 ## Configuration
 Copy [config.example.yaml](config.example.yaml) to `config.yaml` (next to the executable, or `~/Library/Application Support/robot/` on macOS and `%AppData%\robot\` on Windows). Logs are in the `logs` folder next to it. Key options: `wake_word`, `mic_device`, `vosk_model_path`, `whisper_url`, `lmstudio_url`, `model_name`, `piper_path`, `piper_voice`, `silence_ms`, `follow_up_seconds`, `session_timeout_minutes`, `max_clarifications`, `max_tool_calls`, `allowed_folders`, `apps`. The system prompt lives in `prompt.md`.

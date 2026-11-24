@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/4yvi/robot/internal/audio"
+	"github.com/4yvi/robot/internal/bootstrap"
 	"github.com/4yvi/robot/internal/clarify"
 	"github.com/4yvi/robot/internal/config"
 	"github.com/4yvi/robot/internal/llm"
@@ -148,6 +149,7 @@ func runApp(cfg *config.Config, withTray bool) {
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
+	go prepareSpeechRecognition(ctx, app)
 	slog.Info("robot started", "version", version, "config", cfg.Path())
 
 	if !withTray {
@@ -160,4 +162,50 @@ func runApp(cfg *config.Config, withTray bool) {
 		}
 	}()
 	runTray(ctx, stop, app)
+}
+
+// prepareSpeechRecognition downloads the whisper model on first run (it is too
+// big to ship) and starts the local whisper-server, announcing progress by voice.
+func prepareSpeechRecognition(ctx context.Context, app *App) {
+	cfg := app.cfg
+	model := cfg.ResolvePath(cfg.WhisperModelPath)
+	if _, err := os.Stat(model); err != nil {
+		// not shipped with the app: keep the download in the user data folder
+		if d, derr := config.Dir(); derr == nil {
+			model = filepath.Join(d, "models", filepath.Base(cfg.WhisperModelPath))
+		}
+	}
+	downloaded := false
+	if _, err := os.Stat(model); err != nil {
+		slog.Info("downloading whisper model", "url", cfg.WhisperModelURL, "to", model)
+		app.mgr.Say("Первый запуск. Скачиваю модель распознавания речи, это займёт несколько минут.")
+		lastPct := -1
+		err := bootstrap.EnsureFile(ctx, cfg.WhisperModelURL, model, func(done, total int64) {
+			if total > 0 {
+				if pct := int(done * 100 / total); pct/10 != lastPct/10 {
+					lastPct = pct
+					slog.Info("whisper model download", "percent", pct)
+				}
+			}
+		})
+		if err != nil {
+			slog.Error("whisper model download failed", "err", err)
+			app.mgr.Say("Не удалось скачать модель распознавания речи. Проверьте интернет и перезапустите меня.")
+			return
+		}
+		slog.Info("whisper model ready")
+		downloaded = true
+	}
+	stop, err := bootstrap.StartWhisper(ctx, cfg.ResolvePath(cfg.WhisperServerPath), model, cfg.WhisperURL)
+	if err != nil {
+		slog.Error("whisper-server", "err", err)
+		app.mgr.Say("Не удалось запустить распознавание речи.")
+		return
+	}
+	slog.Info("speech recognition ready")
+	if downloaded && ctx.Err() == nil {
+		app.mgr.Say("Готово. Скажите: робот.")
+	}
+	<-ctx.Done()
+	stop()
 }
