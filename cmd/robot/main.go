@@ -9,11 +9,13 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/4yvi/robot/internal/audio"
 	"github.com/4yvi/robot/internal/config"
 	"github.com/4yvi/robot/internal/stt"
+	"github.com/4yvi/robot/internal/tts"
 	"github.com/4yvi/robot/internal/wake"
 )
 
@@ -38,6 +40,8 @@ func main() {
 		cmdDevices(cfg)
 	case "listen":
 		cmdListen(cfg)
+	case "say":
+		cmdSay(cfg, strings.Join(os.Args[2:], " "))
 	case "record-test":
 		cmdRecordTest(cfg)
 	default:
@@ -141,4 +145,21 @@ func cmdListen(cfg *config.Config) {
 		fmt.Println("you said:", text)
 		det.Reset()
 	})
+}
+
+// cmdSay speaks the given text with Piper (stage 4 check).
+func cmdSay(cfg *config.Config, text string) {
+	if strings.TrimSpace(text) == "" {
+		text = "Привет! Я робот, ваш голосовой помощник."
+	}
+	a, err := audio.New(cfg.MicDevice, cfg.SpeakerDevice)
+	fatal(err)
+	defer a.Close()
+	sp := &tts.Speaker{
+		Synth:  &tts.Piper{Path: cfg.ResolvePath(cfg.PiperPath), Voice: cfg.ResolvePath(cfg.PiperVoice)},
+		Player: a,
+	}
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
+	fatal(sp.Speak(ctx, text))
 }
