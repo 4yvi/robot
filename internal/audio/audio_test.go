@@ -1,6 +1,9 @@
 package audio
 
-import "testing"
+import (
+	"context"
+	"testing"
+)
 
 func tone(n int, amp float64) []int16 {
 	s := make([]int16, n)
@@ -57,5 +60,30 @@ func TestVADMaxLength(t *testing.T) {
 	}
 	if !done {
 		t.Fatal("max length not enforced")
+	}
+}
+
+func TestRecordPhrase(t *testing.T) {
+	ch := make(chan []int16, 40)
+	for i := 0; i < 3; i++ {
+		ch <- tone(1600, 8000)
+	}
+	for i := 0; i < 15; i++ {
+		ch <- make([]int16, 1600)
+	}
+	got, err := RecordPhrase(context.Background(), ch, NewVAD(1200, 30000), 0)
+	if err != nil || len(got) != 1600*15 {
+		t.Fatalf("err=%v len=%d", err, len(got))
+	}
+}
+
+func TestRecordPhraseNoSpeech(t *testing.T) {
+	ch := make(chan []int16, 40)
+	for i := 0; i < 30; i++ {
+		ch <- make([]int16, 1600)
+	}
+	_, err := RecordPhrase(context.Background(), ch, NewVAD(1200, 30000), 2000)
+	if err != ErrNoSpeech {
+		t.Fatalf("err=%v", err)
 	}
 }

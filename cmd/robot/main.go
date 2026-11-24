@@ -13,6 +13,7 @@ import (
 
 	"github.com/4yvi/robot/internal/audio"
 	"github.com/4yvi/robot/internal/config"
+	"github.com/4yvi/robot/internal/stt"
 	"github.com/4yvi/robot/internal/wake"
 )
 
@@ -120,9 +121,24 @@ func cmdListen(cfg *config.Config) {
 	fatal(err)
 	fmt.Printf("Listening for %q, Ctrl+C to quit\n", cfg.WakeWord)
 	beep := audio.Beep(880, 150)
+	tr := stt.New(cfg.WhisperURL, "ru")
 	wake.Listen(ctx, det, chunks, func() {
 		slog.Info("wake word detected", "word", cfg.WakeWord)
-		fmt.Println("wake!")
-		go func() { _ = a.Play(ctx, beep) }()
+		fmt.Println("wake! speak now...")
+		_ = a.Play(ctx, beep)
+		vad := audio.NewVAD(cfg.SilenceMS, cfg.MaxPhraseSeconds*1000)
+		pcm, err := audio.RecordPhrase(ctx, chunks, vad, 5000)
+		if err != nil {
+			slog.Warn("record phrase", "err", err)
+			return
+		}
+		text, err := tr.Transcribe(ctx, audio.EncodeWAV(pcm, audio.SampleRate, audio.Channels))
+		if err != nil {
+			slog.Error("transcribe", "err", err)
+			return
+		}
+		slog.Info("recognized", "text", text)
+		fmt.Println("you said:", text)
+		det.Reset()
 	})
 }
