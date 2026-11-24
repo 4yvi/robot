@@ -156,10 +156,7 @@ func cmdSay(cfg *config.Config, text string) {
 	a, err := audio.New(cfg.MicDevice, cfg.SpeakerDevice)
 	fatal(err)
 	defer a.Close()
-	sp := &tts.Speaker{
-		Synth:  &tts.Piper{Path: cfg.ResolvePath(cfg.PiperPath), Voice: cfg.ResolvePath(cfg.PiperVoice)},
-		Player: a,
-	}
+	sp := &tts.Speaker{Synth: newSynth(cfg), Player: a}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 	fatal(sp.Speak(ctx, text))

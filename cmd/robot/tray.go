@@ -72,8 +72,8 @@ func runTray(ctx context.Context, stop context.CancelFunc, app *App) {
 
 		// LM Studio
 		lmItem := systray.AddMenuItem("LM Studio: "+cfg.LMStudioURL+" (изменить)", "")
-		check := systray.AddMenuItem("Проверить соединение", "")
-		models := systray.AddMenuItem("Модель: "+orDefault(cfg.ModelName, "авто"), "")
+		check := systray.AddMenuItem("Проверить соединение / обновить список моделей", "")
+		models := systray.AddMenuItem("Модель (выбрать): "+orDefault(cfg.ModelName, "авто"), "")
 		modelMenu := &choiceMenu{parent: models}
 		refreshModels := func() string {
 			c, cancel := context.WithTimeout(ctx, 8*time.Second)
@@ -82,10 +82,19 @@ func runTray(ctx context.Context, stop context.CancelFunc, app *App) {
 			if err != nil {
 				return "нет связи: " + err.Error()
 			}
+			known := false
+			for _, id := range ids {
+				known = known || id == app.llm.Model
+			}
+			if !known && len(ids) > 0 { // saved model is not on this server: fall back to the first one
+				app.llm.SetModel(ids[0])
+				_ = cfg.Update(func(c *config.Config) { c.ModelName = ids[0] })
+			}
+			models.SetTitle("Модель (выбрать): " + orDefault(app.llm.Model, "авто"))
 			modelMenu.rebuild(ids, app.llm.Model, func(name string) {
 				app.llm.SetModel(name)
 				_ = cfg.Update(func(c *config.Config) { c.ModelName = name })
-				models.SetTitle("Модель: " + name)
+				models.SetTitle("Модель (выбрать): " + name)
 			})
 			return fmt.Sprintf("доступно моделей: %d", len(ids))
 		}
@@ -144,6 +153,7 @@ func runTray(ctx context.Context, stop context.CancelFunc, app *App) {
 							return
 						}
 						app.llm.SetBaseURL(v)
+						v = app.llm.BaseURL // normalized, with /v1
 						_ = cfg.Update(func(c *config.Config) { c.LMStudioURL = v })
 						lmItem.SetTitle("LM Studio: " + v + " (изменить)")
 						check.SetTitle("Проверка: " + refreshModels())

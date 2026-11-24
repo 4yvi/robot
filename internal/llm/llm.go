@@ -70,7 +70,7 @@ type HTTPClient struct {
 // New creates a client. baseURL looks like http://localhost:1234/v1.
 func New(baseURL, model string) *HTTPClient {
 	return &HTTPClient{
-		BaseURL: strings.TrimRight(baseURL, "/"),
+		BaseURL: NormalizeURL(baseURL),
 		Model:   model,
 		HTTP:    &http.Client{},
 	}
@@ -80,7 +80,34 @@ func New(baseURL, model string) *HTTPClient {
 func (c *HTTPClient) SetModel(m string) { c.Model = m }
 
 // SetBaseURL changes the server address.
-func (c *HTTPClient) SetBaseURL(u string) { c.BaseURL = strings.TrimRight(u, "/") }
+func (c *HTTPClient) SetBaseURL(u string) { c.BaseURL = NormalizeURL(u) }
+
+// NormalizeURL accepts "192.168.1.5:1234", "http://host:1234" or the full
+// ".../v1" form and returns the API base URL ending in /v1.
+func NormalizeURL(u string) string {
+	u = strings.TrimRight(strings.TrimSpace(u), "/")
+	if u == "" {
+		return u
+	}
+	if !strings.Contains(u, "://") {
+		u = "http://" + u
+	}
+	if !strings.HasSuffix(u, "/v1") {
+		u += "/v1"
+	}
+	return u
+}
+
+// ensureModel picks the first model the server lists when none was chosen,
+// because LM Studio rejects requests without a model when nothing is loaded.
+func (c *HTTPClient) ensureModel(ctx context.Context) {
+	if c.Model != "" {
+		return
+	}
+	if ids, err := c.Models(ctx); err == nil && len(ids) > 0 {
+		c.Model = ids[0]
+	}
+}
 
 type chatRequest struct {
 	Model          string    `json:"model,omitempty"`
@@ -92,6 +119,10 @@ type chatRequest struct {
 }
 
 func (c *HTTPClient) post(ctx context.Context, req chatRequest) (*http.Response, error) {
+	if req.Model == "" {
+		c.ensureModel(ctx)
+		req.Model = c.Model
+	}
 	b, err := json.Marshal(req)
 	if err != nil {
 		return nil, err

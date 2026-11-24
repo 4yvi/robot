@@ -23,6 +23,8 @@ type Config struct {
 	WhisperModelURL       string            `yaml:"whisper_model_url"`
 	LMStudioURL           string            `yaml:"lmstudio_url"`
 	ModelName             string            `yaml:"model_name"`
+	TTSEngine             string            `yaml:"tts_engine"` // "piper" or "say" (macOS built-in voice)
+	SayVoice              string            `yaml:"say_voice"`
 	PiperPath             string            `yaml:"piper_path"`
 	PiperVoice            string            `yaml:"piper_voice"`
 	PromptPath            string            `yaml:"prompt_path"`
@@ -52,6 +54,8 @@ func Default() *Config {
 		WhisperModelPath:      "models/whisper/ggml-small.bin",
 		WhisperModelURL:       "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin",
 		LMStudioURL:           "http://localhost:1234/v1",
+		TTSEngine:             defaultTTS(),
+		SayVoice:              "Milena",
 		PiperPath:             "models/piper/piper" + exeSuffix(),
 		PiperVoice:            "models/piper/ru_RU-irina-medium.onnx",
 		PromptPath:            "prompt.md",
@@ -64,6 +68,15 @@ func Default() *Config {
 		StopPhrases:           []string{"хватит", "пока", "стоп"},
 		Apps:                  map[string]string{},
 	}
+}
+
+// defaultTTS: the macOS Piper release ships without its dylibs, so macOS uses
+// the system voice by default.
+func defaultTTS() string {
+	if runtime.GOOS == "darwin" {
+		return "say"
+	}
+	return "piper"
 }
 
 func exeSuffix() string {

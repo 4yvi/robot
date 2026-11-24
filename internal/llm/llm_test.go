@@ -89,3 +89,34 @@ func TestLoadPromptFallback(t *testing.T) {
 		t.Fatal("expected fallback")
 	}
 }
+
+func TestNormalizeURL(t *testing.T) {
+	for in, want := range map[string]string{
+		"192.168.1.81:1234":            "http://192.168.1.81:1234/v1",
+		"http://192.168.1.81:1234":     "http://192.168.1.81:1234/v1",
+		"http://192.168.1.81:1234/v1/": "http://192.168.1.81:1234/v1",
+		"  http://localhost:1234/v1  ": "http://localhost:1234/v1",
+	} {
+		if got := NormalizeURL(in); got != want {
+			t.Errorf("NormalizeURL(%q) = %q, want %q", in, got, want)
+		}
+	}
+}
+
+func TestChatPicksFirstModelWhenNoneChosen(t *testing.T) {
+	var got string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.Path, "/models") {
+			_, _ = w.Write([]byte(`{"data":[{"id":"first"},{"id":"second"}]}`))
+			return
+		}
+		var req chatRequest
+		_ = json.NewDecoder(r.Body).Decode(&req)
+		got = req.Model
+		sse(w, `{"choices":[{"delta":{"content":"ok"}}]}`)
+	}))
+	defer srv.Close()
+	if _, err := New(srv.URL, "").Chat(context.Background(), nil, nil, nil); err != nil || got != "first" {
+		t.Fatalf("model=%q err=%v", got, err)
+	}
+}

@@ -105,11 +105,8 @@ func newApp(cfg *config.Config) (*App, error) {
 		LLM:     lm,
 		Clarify: &clarify.Step{Checker: clarify.LLM{Client: lm}, Max: cfg.MaxClarifications},
 		Tools:   tools.NewDefault(env),
-		Speaker: &tts.Speaker{
-			Synth:  &tts.Piper{Path: cfg.ResolvePath(cfg.PiperPath), Voice: cfg.ResolvePath(cfg.PiperVoice)},
-			Player: a,
-		},
-		Store: store,
+		Speaker: &tts.Speaker{Synth: newSynth(cfg), Player: a},
+		Store:   store,
 	})
 	if err != nil {
 		store.Close()
@@ -209,4 +206,11 @@ func prepareSpeechRecognition(ctx context.Context, app *App) {
 	}
 	<-ctx.Done()
 	stop()
+}
+
+func newSynth(cfg *config.Config) tts.Synthesizer {
+	if cfg.TTSEngine == "say" {
+		return &tts.Say{Voice: cfg.SayVoice}
+	}
+	return &tts.Piper{Path: cfg.ResolvePath(cfg.PiperPath), Voice: cfg.ResolvePath(cfg.PiperVoice)}
 }
