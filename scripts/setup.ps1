@@ -33,6 +33,11 @@ if (-not (Test-Path "third_party\vosk\libvosk.dll")) {
     Remove-Item "third_party\vosk.zip"
 }
 
+if ((Test-Path "third_party\vosk\libvosk.dll") -and -not (Test-Path "third_party\vosk\libdl.a")) {
+    # vosk-api/go asks for -ldl, which MinGW lacks: give the linker an empty stand-in.
+    & ar rcs "third_party\vosk\libdl.a"
+}
+
 Write-Host "==> whisper.cpp server"
 if (-not (Test-Path "$Models\whisper\whisper-server.exe")) {
     $rel = Invoke-RestMethod "https://api.github.com/repos/ggml-org/whisper.cpp/releases/latest"

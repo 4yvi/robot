@@ -15,7 +15,13 @@ mv "$DIR/$NAME"/* "$DIR/" && rmdir "$DIR/$NAME" && rm "$DIR/vosk.zip"
 # MinGW gcc needs Windows-style paths (D:/a/...), not Git Bash ones (/d/a/...).
 if command -v cygpath >/dev/null 2>&1; then DIR="$(cygpath -m "$DIR")"; fi
 LIBS=""
-case "$(uname -s)" in MINGW*|MSYS*|CYGWIN*) LIBS=" -lvosk" ;; esac
+case "$(uname -s)" in
+  MINGW*|MSYS*|CYGWIN*)
+    LIBS=" -lvosk"
+    # vosk-api/go asks for -ldl, which MinGW lacks: give the linker an empty stand-in.
+    [ -f "$DIR/libdl.a" ] || ar rcs "$DIR/libdl.a"
+    ;;
+esac
 echo "CGO_CPPFLAGS=-I$DIR"
 echo "CGO_LDFLAGS=-L$DIR$LIBS"
 if [ -n "${GITHUB_ENV:-}" ]; then
