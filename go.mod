@@ -1,6 +1,6 @@
 module github.com/4yvi/robot
 
-go 1.26.5
+go 1.26.0
 
 require (
 	fyne.io/systray v1.12.2

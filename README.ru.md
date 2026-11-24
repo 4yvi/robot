@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/4yvi/robot/actions/workflows/ci.yml/badge.svg)](https://github.com/4yvi/robot/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Go version](https://img.shields.io/badge/go-1.22%2B-00ADD8.svg)](go.mod)
+[![Go version](https://img.shields.io/badge/go-1.26%2B-00ADD8.svg)](go.mod)
 
 [English](README.md) | Русский
 
@@ -30,7 +30,7 @@
 
 ## Требования
 - Windows 10/11 x64 или macOS 11+ (arm64 / x86_64)
-- Go 1.22+ и C-компилятор (MinGW-w64 на Windows, Xcode CLT на macOS) для сборки из исходников
+- Go 1.26+ и C-компилятор (MinGW-w64 на Windows, Xcode CLT на macOS) для сборки из исходников
 - [LM Studio](https://lmstudio.ai) с загруженной моделью и запущенным локальным сервером
 - cmake (на macOS, для сборки whisper.cpp с Metal)
 
@@ -58,7 +58,7 @@ CGO_CPPFLAGS=-I$PWD/third_party/vosk CGO_LDFLAGS=-L$PWD/third_party/vosk go buil
 4. Скажите **«робот»**.
 
 ## Конфигурация
-Скопируйте [config.example.yaml](config.example.yaml) в `config.yaml` (рядом с exe, либо `~/Library/Application Support/robot/` на macOS и `%AppData%\\robot\\` на Windows). Логи лежат в папке `logs` рядом с ним. Основные параметры: `wake_word`, `mic_device`, `vosk_model_path`, `whisper_url`, `lmstudio_url`, `model_name`, `piper_path`, `piper_voice`, `silence_ms`, `follow_up_seconds`, `session_timeout_minutes`, `max_clarifications`, `max_tool_calls`, `allowed_folders`, `apps`. Системный промпт лежит в `prompt.md`.
+Скопируйте [config.example.yaml](config.example.yaml) в `config.yaml` (рядом с exe, либо `~/Library/Application Support/robot/` на macOS и `%AppData%\robot\` на Windows). Логи лежат в папке `logs` рядом с ним. Основные параметры: `wake_word`, `mic_device`, `vosk_model_path`, `whisper_url`, `lmstudio_url`, `model_name`, `piper_path`, `piper_voice`, `silence_ms`, `follow_up_seconds`, `session_timeout_minutes`, `max_clarifications`, `max_tool_calls`, `allowed_folders`, `apps`. Системный промпт лежит в `prompt.md`.
 
 ## Использование
 ```

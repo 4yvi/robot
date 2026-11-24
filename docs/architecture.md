@@ -61,3 +61,4 @@ Build tags separate OS code: media/volume (Windows API / `osascript`), clipboard
 - **Tool limit.** After `max_tool_calls` calls in one answer the model is called without tools so it has to answer with what it has.
 - **Shell tool.** Named `run_shell` (PowerShell on Windows, zsh on macOS). It asks the user to say "да" before running anything.
 - **Release builds.** CGO and native libraries mean each OS builds on its own runner: `.goreleaser.windows.yaml` on `windows-latest`, `.goreleaser.darwin.yaml` on `macos-latest`; both append assets to the release created by release-please.
+- **Go version.** `go.mod` targets Go 1.26 because the latest `modernc.org/sqlite`, `golang.org/x/net` and `fyne.io/systray` require it (the plan asked for 1.22 or newer).

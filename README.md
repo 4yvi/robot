@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/4yvi/robot/actions/workflows/ci.yml/badge.svg)](https://github.com/4yvi/robot/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Go version](https://img.shields.io/badge/go-1.22%2B-00ADD8.svg)](go.mod)
+[![Go version](https://img.shields.io/badge/go-1.26%2B-00ADD8.svg)](go.mod)
 
 English | [Русский](README.ru.md)
 
@@ -30,7 +30,7 @@ Details: [docs/architecture.md](docs/architecture.md).
 
 ## Requirements
 - Windows 10/11 x64 or macOS 11+ (arm64 / x86_64)
-- Go 1.22+ and a C compiler (MinGW-w64 on Windows, Xcode CLT on macOS) to build from source
+- Go 1.26+ and a C compiler (MinGW-w64 on Windows, Xcode CLT on macOS) to build from source
 - [LM Studio](https://lmstudio.ai) with a model loaded and the local server started
 - cmake (macOS, to build whisper.cpp with Metal)
 
@@ -59,7 +59,7 @@ On Windows add `-ldflags "-H=windowsgui"` and `-lvosk`. For macOS, `bash scripts
 4. Say **«робот»**.
 
 ## Configuration
-Copy [config.example.yaml](config.example.yaml) to `config.yaml` (next to the executable, or `~/Library/Application Support/robot/` on macOS and `%AppData%\\robot\\` on Windows). Logs are in the `logs` folder next to it. Key options: `wake_word`, `mic_device`, `vosk_model_path`, `whisper_url`, `lmstudio_url`, `model_name`, `piper_path`, `piper_voice`, `silence_ms`, `follow_up_seconds`, `session_timeout_minutes`, `max_clarifications`, `max_tool_calls`, `allowed_folders`, `apps`. The system prompt lives in `prompt.md`.
+Copy [config.example.yaml](config.example.yaml) to `config.yaml` (next to the executable, or `~/Library/Application Support/robot/` on macOS and `%AppData%\robot\` on Windows). Logs are in the `logs` folder next to it. Key options: `wake_word`, `mic_device`, `vosk_model_path`, `whisper_url`, `lmstudio_url`, `model_name`, `piper_path`, `piper_voice`, `silence_ms`, `follow_up_seconds`, `session_timeout_minutes`, `max_clarifications`, `max_tool_calls`, `allowed_folders`, `apps`. The system prompt lives in `prompt.md`.
 
 ## Usage
 ```
