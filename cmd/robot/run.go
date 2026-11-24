@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"path/filepath"
 	"runtime"
+	"syscall"
 	"time"
 
 	"github.com/4yvi/robot/internal/audio"
@@ -147,7 +148,7 @@ func runApp(cfg *config.Config, withTray bool) {
 	}
 	defer app.close()
 
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	go prepareSpeechRecognition(ctx, app)
 	slog.Info("robot started", "version", version, "config", cfg.Path())
