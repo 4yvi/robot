@@ -41,7 +41,7 @@ jobs:
             config: .goreleaser.darwin.yaml
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           ref: ${{ github.event_name == 'workflow_dispatch' && github.ref || needs.release-please.outputs.tag_name }}
