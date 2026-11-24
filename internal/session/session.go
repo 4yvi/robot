@@ -52,6 +52,7 @@ type Deps struct {
 	Speaker     *tts.Speaker
 	Store       memory.Store
 	OnState     func(State)
+	OnUserText  func(string) // what the user just asked, for the status display
 }
 
 // Manager owns the dialog loop.
@@ -127,6 +128,9 @@ func (m *Manager) SetWakeWord(word string) error {
 	old.Close()
 	return nil
 }
+
+// SetOnUserText sets the callback that receives each recognized user phrase.
+func (m *Manager) SetOnUserText(f func(string)) { m.d.OnUserText = f }
 
 // SetOnState sets the callback invoked on every state change.
 func (m *Manager) SetOnState(f func(State)) { m.d.OnState = f }

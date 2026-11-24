@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"fyne.io/systray"
@@ -61,6 +62,15 @@ func runTray(ctx context.Context, stop context.CancelFunc, app *App) {
 		head.Disable()
 		status := systray.AddMenuItem("Состояние: "+stateTitles[session.StateIdle], "")
 		status.Disable()
+		question := systray.AddMenuItem("Вопрос: -", "")
+		question.Disable()
+		app.mgr.SetOnUserText(func(t string) {
+			t = strings.Join(strings.Fields(t), " ")
+			if r := []rune(t); len(r) > 90 {
+				t = string(r[:90]) + "…"
+			}
+			question.SetTitle("Вопрос: " + t)
+		})
 		app.mgr.SetOnState(func(s session.State) {
 			systray.SetIcon(tray.Icon(string(s)))
 			systray.SetTooltip("Robot: " + stateTitles[s])

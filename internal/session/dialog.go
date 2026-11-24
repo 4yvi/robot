@@ -190,6 +190,9 @@ func (m *Manager) handleSession(ctx context.Context) {
 		if text == "" {
 			return // silence: the session goes to waiting
 		}
+		if m.d.OnUserText != nil {
+			m.d.OnUserText(text)
+		}
 		if IsStop(text, m.d.Cfg.StopPhrases) {
 			m.speakText(ctx, "Хорошо, до связи.")
 			m.endSession(s)
@@ -197,9 +200,13 @@ func (m *Manager) handleSession(ctx context.Context) {
 		}
 
 		turnCtx, cancel := context.WithCancel(ctx)
+		bg := newBargeGate()
 		restore := m.setRoute(func(c []int16) { // the wake word interrupts the answer
-			if m.detAccept(c) {
+			hit := m.detAccept(c)
+			if loud := bg.feed(c); hit && loud && m.d.Cfg.BargeIn {
 				cancel()
+			} else if hit {
+				slog.Debug("ignored wake word heard during the answer (likely echo)")
 			}
 		})
 		err = m.respond(turnCtx, s, text)

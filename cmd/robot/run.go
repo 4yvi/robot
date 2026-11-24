@@ -208,9 +208,26 @@ func prepareSpeechRecognition(ctx context.Context, app *App) {
 	stop()
 }
 
+// newSynth picks the voice engine. "auto" prefers the neural sherpa voice when
+// its files are present, then the macOS system voice, then Piper.
 func newSynth(cfg *config.Config) tts.Synthesizer {
-	if cfg.TTSEngine == "say" {
+	sh := &tts.Sherpa{Exe: cfg.ResolvePath(cfg.SherpaPath), VoiceDir: cfg.ResolvePath(cfg.SherpaVoiceDir), Speed: cfg.SpeechSpeed}
+	piper := &tts.Piper{Path: cfg.ResolvePath(cfg.PiperPath), Voice: cfg.ResolvePath(cfg.PiperVoice)}
+	switch cfg.TTSEngine {
+	case "sherpa":
+		return sh
+	case "say":
+		return &tts.Say{Voice: cfg.SayVoice}
+	case "piper":
+		return piper
+	}
+	if sh.Available() {
+		slog.Info("voice engine", "engine", "sherpa")
+		return sh
+	}
+	if runtime.GOOS == "darwin" {
+		slog.Info("voice engine", "engine", "say (sherpa files not found)")
 		return &tts.Say{Voice: cfg.SayVoice}
 	}
-	return &tts.Piper{Path: cfg.ResolvePath(cfg.PiperPath), Voice: cfg.ResolvePath(cfg.PiperVoice)}
+	return piper
 }

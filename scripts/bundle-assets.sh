@@ -16,18 +16,27 @@ curl -fsSL -o "$TMP/vosk.zip" https://alphacephei.com/vosk/models/vosk-model-sma
 unzip -q "$TMP/vosk.zip" -d "$TMP"
 mv "$TMP/vosk-model-small-ru-0.22" "$DEST/models/vosk-model-small-ru"
 
-echo "==> Piper"
+echo "==> Neural voice (sherpa-onnx + Piper VITS voice)"
+# v1.12.x still accepts Piper voices with --vits-data-dir; v2.x dropped it.
+SHERPA_VER="v1.12.28"
 if [ "$OS" = windows ]; then
-  curl -fsSL -o "$TMP/piper.zip" "https://github.com/rhasspy/piper/releases/download/$PIPER_VER/piper_windows_amd64.zip"
-  unzip -q "$TMP/piper.zip" -d "$DEST/models"
+  SHERPA_PKG="sherpa-onnx-$SHERPA_VER-win-x64-shared-MD-Release"
 else
-  [ "$ARCH" = arm64 ] && PA=aarch64 || PA=x64
-  curl -fsSL -o "$TMP/piper.tgz" "https://github.com/rhasspy/piper/releases/download/$PIPER_VER/piper_macos_$PA.tar.gz"
-  tar -xzf "$TMP/piper.tgz" -C "$DEST/models"
+  SHERPA_PKG="sherpa-onnx-$SHERPA_VER-osx-universal2-shared"
 fi
-for f in ru_RU-irina-medium.onnx ru_RU-irina-medium.onnx.json; do
-  curl -fsSL -o "$DEST/models/piper/$f" "$VOICE/$f"
-done
+curl -fsSL -o "$TMP/sherpa.tar.bz2" "https://github.com/k2-fsa/sherpa-onnx/releases/download/$SHERPA_VER/$SHERPA_PKG.tar.bz2"
+tar -xjf "$TMP/sherpa.tar.bz2" -C "$TMP"
+mkdir -p "$DEST/models/sherpa/bin" "$DEST/models/sherpa/lib"
+cp "$TMP/$SHERPA_PKG"/bin/sherpa-onnx-offline-tts* "$DEST/models/sherpa/bin/"
+if [ "$OS" = windows ]; then
+  cp "$TMP/$SHERPA_PKG"/bin/*.dll "$DEST/models/sherpa/bin/"
+else
+  cp "$TMP/$SHERPA_PKG"/lib/*.dylib "$DEST/models/sherpa/lib/"
+fi
+curl -fsSL -o "$TMP/voice.tar.bz2" https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-piper-ru_RU-irina-medium.tar.bz2
+tar -xjf "$TMP/voice.tar.bz2" -C "$TMP"
+mv "$TMP/vits-piper-ru_RU-irina-medium" "$DEST/models/sherpa/voice"
+rm -f "$DEST/models/sherpa/voice/MODEL_CARD"
 
 echo "==> whisper-server $WHISPER_TAG"
 git clone -q --depth 1 --branch "$WHISPER_TAG" https://github.com/ggml-org/whisper.cpp "$TMP/whisper.cpp"
