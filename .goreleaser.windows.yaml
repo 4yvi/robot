@@ -24,6 +24,8 @@ archives:
       - README.md
       - LICENSE
       - scripts/setup.ps1
+      - src: third_party/vosk/*.dll
+        strip_parent: true
 
 checksum:
   name_template: "checksums_windows.txt"

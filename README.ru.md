@@ -58,13 +58,17 @@ CGO_CPPFLAGS=-I$PWD/third_party/vosk CGO_LDFLAGS=-L$PWD/third_party/vosk go buil
 4. Скажите **«робот»**.
 
 ## Конфигурация
-Скопируйте [config.example.yaml](config.example.yaml) в `config.yaml` (рядом с exe или в папку конфигов пользователя). Основные параметры: `wake_word`, `mic_device`, `vosk_model_path`, `whisper_url`, `lmstudio_url`, `model_name`, `piper_path`, `piper_voice`, `silence_ms`, `follow_up_seconds`, `session_timeout_minutes`, `max_clarifications`, `max_tool_calls`, `allowed_folders`, `apps`. Системный промпт лежит в `prompt.md`.
+Скопируйте [config.example.yaml](config.example.yaml) в `config.yaml` (рядом с exe, либо `~/Library/Application Support/robot/` на macOS и `%AppData%\\robot\\` на Windows). Логи лежат в папке `logs` рядом с ним. Основные параметры: `wake_word`, `mic_device`, `vosk_model_path`, `whisper_url`, `lmstudio_url`, `model_name`, `piper_path`, `piper_voice`, `silence_ms`, `follow_up_seconds`, `session_timeout_minutes`, `max_clarifications`, `max_tool_calls`, `allowed_folders`, `apps`. Системный промпт лежит в `prompt.md`.
 
 ## Использование
 ```
-robot            запуск в фоне
-robot devices    список аудиоустройств
-robot history    последние сессии
+robot               запуск в фоне со значком в трее
+robot headless      запуск без трея (логи в терминал)
+robot devices       список аудиоустройств
+robot record-test   записать 5 секунд и воспроизвести
+robot listen        проверка кодового слова и распознавания
+robot say "текст"   озвучить текст через Piper
+robot history       последние сессии (--full с репликами)
 ```
 Слова завершения: «хватит», «пока», «стоп».
 

@@ -59,13 +59,17 @@ On Windows add `-ldflags "-H=windowsgui"` and `-lvosk`. For macOS, `bash scripts
 4. Say **«робот»**.
 
 ## Configuration
-Copy [config.example.yaml](config.example.yaml) to `config.yaml` (next to the executable or in the user config dir). Key options: `wake_word`, `mic_device`, `vosk_model_path`, `whisper_url`, `lmstudio_url`, `model_name`, `piper_path`, `piper_voice`, `silence_ms`, `follow_up_seconds`, `session_timeout_minutes`, `max_clarifications`, `max_tool_calls`, `allowed_folders`, `apps`. The system prompt lives in `prompt.md`.
+Copy [config.example.yaml](config.example.yaml) to `config.yaml` (next to the executable, or `~/Library/Application Support/robot/` on macOS and `%AppData%\\robot\\` on Windows). Logs are in the `logs` folder next to it. Key options: `wake_word`, `mic_device`, `vosk_model_path`, `whisper_url`, `lmstudio_url`, `model_name`, `piper_path`, `piper_voice`, `silence_ms`, `follow_up_seconds`, `session_timeout_minutes`, `max_clarifications`, `max_tool_calls`, `allowed_folders`, `apps`. The system prompt lives in `prompt.md`.
 
 ## Usage
 ```
-robot            run in the background
-robot devices    list audio devices
-robot history    show recent sessions
+robot               run in the background with a tray icon
+robot headless      run without the tray (logs to the terminal)
+robot devices       list audio devices
+robot record-test   record 5 seconds and play them back
+robot listen        wake word + phrase recognition check
+robot say "text"    speak text with Piper
+robot history       show recent sessions (add --full for messages)
 ```
 Stop phrases: «хватит», «пока», «стоп».
 

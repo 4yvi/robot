@@ -1,6 +1,7 @@
 package config
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 )
@@ -27,5 +28,23 @@ func TestUpdateRoundTrip(t *testing.T) {
 	}
 	if c2.WakeWord != "компьютер" || !c2.Autostart || c2.FollowUpSeconds != 8 {
 		t.Fatalf("round trip failed: %+v", c2)
+	}
+}
+
+func TestResolvePath(t *testing.T) {
+	dir := t.TempDir()
+	c := Default()
+	c.path = filepath.Join(dir, "config.yaml")
+	if got := c.ResolvePath("models/x"); got != filepath.Join(dir, "models", "x") {
+		t.Fatalf("missing file should resolve next to config, got %s", got)
+	}
+	_ = os.MkdirAll(filepath.Join(dir, "models"), 0o755)
+	_ = os.WriteFile(filepath.Join(dir, "models", "x"), nil, 0o600)
+	if got := c.ResolvePath("models/x"); got != filepath.Join(dir, "models", "x") {
+		t.Fatalf("got %s", got)
+	}
+	abs := filepath.Join(dir, "abs")
+	if c.ResolvePath(abs) != abs {
+		t.Fatal("absolute paths must be unchanged")
 	}
 }

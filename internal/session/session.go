@@ -128,6 +128,9 @@ func (m *Manager) SetWakeWord(word string) error {
 	return nil
 }
 
+// SetOnState sets the callback invoked on every state change.
+func (m *Manager) SetOnState(f func(State)) { m.d.OnState = f }
+
 // Reload restarts microphone capture (after the microphone setting changed).
 func (m *Manager) Reload() {
 	select {

@@ -50,3 +50,14 @@ Build tags separate OS code: media/volume (Windows API / `osascript`), clipboard
 - Not a Windows service: services have no access to the user session microphone.
 - whisper.cpp and Piper are external processes to avoid more cgo dependencies. Only malgo, Vosk and the tray need cgo.
 - Only the wake detector needs Vosk. Packages are built so the rest compiles and tests without cgo.
+
+## Implementation notes
+
+- **Paths.** Config is `config.yaml` next to the executable, else in the working directory, else `os.UserConfigDir()/robot/`. Logs go to `<user config dir>/robot/logs/robot.log`, the database to `<user config dir>/robot/robot.db`, notes to `notes.md` in the same folder. Relative paths inside the config (models, prompt) are looked up next to the config, next to the executable, in `Robot.app/Contents/Resources` and in the working directory.
+- **Wake word robustness.** Vosk with a two-entry grammar tends to map any sentence to the wake word. The detector therefore only uses *final* results and rejects utterances longer than 1.8 s (`wake.Gate`). This is covered by a macOS integration test that synthesizes speech with `say`.
+- **libvosk.** Vosk is pinned to 0.3.42, the newest release that ships both macOS and Windows libraries. Code that needs it sits behind the `vosk` build tag; builds without the tag compile and run all other tests and report a clear error at startup.
+- **Systray.** The requested `github.com/fyne-io/systray` repository declares its module path as `fyne.io/systray`, which is what `go.mod` uses.
+- **Clarification policy.** The check runs before every new question, is skipped when the user is answering a clarifying question, and is capped at `max_clarifications` in a row.
+- **Tool limit.** After `max_tool_calls` calls in one answer the model is called without tools so it has to answer with what it has.
+- **Shell tool.** Named `run_shell` (PowerShell on Windows, zsh on macOS). It asks the user to say "да" before running anything.
+- **Release builds.** CGO and native libraries mean each OS builds on its own runner: `.goreleaser.windows.yaml` on `windows-latest`, `.goreleaser.darwin.yaml` on `macos-latest`; both append assets to the release created by release-please.

@@ -45,12 +45,13 @@ func main() {
 	case "record-test":
 		cmdRecordTest(cfg)
 	default:
-		runCommand(cmd, cfg)
+		runCommand(cmd, os.Args[min(2, len(os.Args)):], cfg)
 	}
 }
 
 func fatal(err error) {
 	if err != nil {
+		slog.Error("fatal", "err", err)
 		fmt.Fprintln(os.Stderr, "error:", err)
 		os.Exit(1)
 	}

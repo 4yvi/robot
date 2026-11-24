@@ -146,13 +146,33 @@ func (c *Config) saveLocked() error {
 	return os.Rename(tmp, c.path)
 }
 
-// ResolvePath makes p absolute relative to the config file's directory.
+// ResolvePath resolves a relative path. It is looked up next to the config
+// file, next to the executable, in the app bundle's Resources folder and in
+// the working directory; the first existing candidate wins. If none exists the
+// path is placed next to the config file.
 func (c *Config) ResolvePath(p string) string {
 	if p == "" || filepath.IsAbs(p) {
 		return p
 	}
+	var dirs []string
 	if c.path != "" {
-		return filepath.Join(filepath.Dir(c.path), p)
+		dirs = append(dirs, filepath.Dir(c.path))
+	}
+	if exe, err := os.Executable(); err == nil {
+		d := filepath.Dir(exe)
+		dirs = append(dirs, d, filepath.Join(d, "..", "Resources"))
+	}
+	if wd, err := os.Getwd(); err == nil {
+		dirs = append(dirs, wd)
+	}
+	for _, d := range dirs {
+		cand := filepath.Join(d, p)
+		if _, err := os.Stat(cand); err == nil {
+			return cand
+		}
+	}
+	if len(dirs) > 0 {
+		return filepath.Join(dirs[0], p)
 	}
 	return p
 }
