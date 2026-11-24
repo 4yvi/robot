@@ -32,6 +32,7 @@ checksum:
 
 release:
   mode: append
+  replace_existing_artifacts: true
 
 changelog:
   disable: true

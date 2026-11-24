@@ -29,28 +29,15 @@ builds:
     hooks:
       post: bash scripts/make-app.sh {{ .Path }} {{ .Version }} {{ .Arch }}
 
-# make-app.sh writes dist/app/<arch>/Robot.app; the archive packs that bundle.
+# make-app.sh builds dist/app/<arch>/Robot.app and Robot_<version>_macos_<arch>.zip
+# (ditto keeps the bundle layout). Those zips are attached as extra files; the
+# meta archive below only carries the setup files.
 archives:
-  - id: macos-arm64
-    ids: [robot-arm64]
+  - id: macos-support
+    meta: true
     formats: [zip]
-    name_template: "Robot_{{ .Version }}_macos_arm64"
+    name_template: "robot_{{ .Version }}_macos_setup"
     files:
-      - src: "dist/app/arm64/Robot.app/**/*"
-        dst: Robot.app
-        strip_parent: false
-      - config.example.yaml
-      - prompt.md
-      - LICENSE
-      - scripts/setup.sh
-  - id: macos-amd64
-    ids: [robot-amd64]
-    formats: [zip]
-    name_template: "Robot_{{ .Version }}_macos_amd64"
-    files:
-      - src: "dist/app/amd64/Robot.app/**/*"
-        dst: Robot.app
-        strip_parent: false
       - config.example.yaml
       - prompt.md
       - LICENSE
@@ -58,9 +45,14 @@ archives:
 
 checksum:
   name_template: "checksums_macos.txt"
+  extra_files:
+    - glob: dist/app/*/Robot_*_macos_*.zip
 
 release:
   mode: append
+  replace_existing_artifacts: true
+  extra_files:
+    - glob: dist/app/*/Robot_*_macos_*.zip
 
 changelog:
   disable: true

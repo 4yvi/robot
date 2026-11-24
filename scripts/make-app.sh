@@ -23,3 +23,7 @@ fi
 # Ad-hoc sign so macOS keeps the microphone permission for the bundle.
 codesign --force --deep --sign - "$APP" >/dev/null 2>&1 || true
 echo "$APP"
+# Zip the bundle with ditto so the Contents/ layout and signature survive.
+ZIP="$ROOT/dist/app/$ARCH/Robot_${VERSION}_macos_${ARCH}.zip"
+rm -f "$ZIP"
+ditto -c -k --keepParent "$APP" "$ZIP"
