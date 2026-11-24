@@ -1,0 +1,158 @@
+// Package config loads and saves robot's YAML configuration.
+package config
+
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"sync"
+
+	"gopkg.in/yaml.v3"
+)
+
+// Config holds all user settings.
+type Config struct {
+	WakeWord              string            `yaml:"wake_word"`
+	MicDevice             string            `yaml:"mic_device"`
+	SpeakerDevice         string            `yaml:"speaker_device"`
+	VoskModelPath         string            `yaml:"vosk_model_path"`
+	WhisperURL            string            `yaml:"whisper_url"`
+	LMStudioURL           string            `yaml:"lmstudio_url"`
+	ModelName             string            `yaml:"model_name"`
+	PiperPath             string            `yaml:"piper_path"`
+	PiperVoice            string            `yaml:"piper_voice"`
+	PromptPath            string            `yaml:"prompt_path"`
+	SilenceMS             int               `yaml:"silence_ms"`
+	MaxPhraseSeconds      int               `yaml:"max_phrase_seconds"`
+	FollowUpSeconds       int               `yaml:"follow_up_seconds"`
+	SessionTimeoutMinutes int               `yaml:"session_timeout_minutes"`
+	MaxClarifications     int               `yaml:"max_clarifications"`
+	MaxToolCalls          int               `yaml:"max_tool_calls"`
+	StopPhrases           []string          `yaml:"stop_phrases"`
+	Autostart             bool              `yaml:"autostart"`
+	AllowedFolders        []string          `yaml:"allowed_folders"`
+	NotesFile             string            `yaml:"notes_file"`
+	Apps                  map[string]string `yaml:"apps"`
+
+	mu   sync.Mutex
+	path string
+}
+
+// Default returns the default configuration.
+func Default() *Config {
+	return &Config{
+		WakeWord:              "робот",
+		VoskModelPath:         "models/vosk-model-small-ru",
+		WhisperURL:            "http://127.0.0.1:8080",
+		LMStudioURL:           "http://localhost:1234/v1",
+		PiperPath:             "models/piper/piper",
+		PiperVoice:            "models/piper/ru_RU-irina-medium.onnx",
+		PromptPath:            "prompt.md",
+		SilenceMS:             1200,
+		MaxPhraseSeconds:      30,
+		FollowUpSeconds:       8,
+		SessionTimeoutMinutes: 10,
+		MaxClarifications:     2,
+		MaxToolCalls:          6,
+		StopPhrases:           []string{"хватит", "пока", "стоп"},
+		Apps:                  map[string]string{},
+	}
+}
+
+// Dir returns the per-user data directory (config, logs, database).
+func Dir() (string, error) {
+	base, err := os.UserConfigDir()
+	if err != nil {
+		return "", err
+	}
+	d := filepath.Join(base, "robot")
+	return d, os.MkdirAll(d, 0o755)
+}
+
+// FindPath returns the config file path: next to the executable if it exists
+// there, otherwise in the user config directory.
+func FindPath() (string, error) {
+	if exe, err := os.Executable(); err == nil {
+		p := filepath.Join(filepath.Dir(exe), "config.yaml")
+		if _, err := os.Stat(p); err == nil {
+			return p, nil
+		}
+	}
+	if p := "config.yaml"; fileExists(p) {
+		return filepath.Abs(p)
+	}
+	d, err := Dir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(d, "config.yaml"), nil
+}
+
+func fileExists(p string) bool { _, err := os.Stat(p); return err == nil }
+
+// Load reads the config at path. A missing file yields defaults.
+func Load(path string) (*Config, error) {
+	c := Default()
+	c.path = path
+	b, err := os.ReadFile(path)
+	if os.IsNotExist(err) {
+		return c, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	if err := yaml.Unmarshal(b, c); err != nil {
+		return nil, fmt.Errorf("parse %s: %w", path, err)
+	}
+	if c.Apps == nil {
+		c.Apps = map[string]string{}
+	}
+	return c, nil
+}
+
+// Path returns the file the config was loaded from.
+func (c *Config) Path() string { return c.path }
+
+// Update applies fn under the lock and saves the config to disk.
+func (c *Config) Update(fn func(*Config)) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	fn(c)
+	return c.saveLocked()
+}
+
+// Save writes the config to disk.
+func (c *Config) Save() error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.saveLocked()
+}
+
+func (c *Config) saveLocked() error {
+	if c.path == "" {
+		return fmt.Errorf("config has no path")
+	}
+	b, err := yaml.Marshal(c)
+	if err != nil {
+		return err
+	}
+	if err := os.MkdirAll(filepath.Dir(c.path), 0o755); err != nil {
+		return err
+	}
+	tmp := c.path + ".tmp"
+	if err := os.WriteFile(tmp, b, 0o600); err != nil {
+		return err
+	}
+	return os.Rename(tmp, c.path)
+}
+
+// ResolvePath makes p absolute relative to the config file's directory.
+func (c *Config) ResolvePath(p string) string {
+	if p == "" || filepath.IsAbs(p) {
+		return p
+	}
+	if c.path != "" {
+		return filepath.Join(filepath.Dir(c.path), p)
+	}
+	return p
+}
