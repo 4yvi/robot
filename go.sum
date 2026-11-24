@@ -1,7 +1,7 @@
 fyne.io/systray v1.12.2 h1:Y8DZxgLHsVQt6rY9Zrkkg+j67S7vv/1F2viOWKPpVeA=
 fyne.io/systray v1.12.2/go.mod h1:RVwqP9nYMo7h5zViCBHri2FgjXF7H2cub7MAq4NSoLs=
-github.com/alphacep/vosk-api/go v0.3.42 h1:1cveMA5+73kxCjAh9Vmm2QroEDkbGlYaQjnmwMLgNl8=
-github.com/alphacep/vosk-api/go v0.3.42/go.mod h1:9X8IJsHnFk/b1xyvjlZifo+ZL5VTAx3LW+JQce/eRcA=
+github.com/alphacep/vosk-api/go v0.3.50 h1:2vSN41RCU1WdHEqBrhKtTggfKL6Yu5Dmj+urVszwiuw=
+github.com/alphacep/vosk-api/go v0.3.50/go.mod h1:9X8IJsHnFk/b1xyvjlZifo+ZL5VTAx3LW+JQce/eRcA=
 github.com/dustin/go-humanize v1.1.0 h1:dbKTrvD0klcbBV/h4AWJdMuZogJACoMlvWIWZ5b2xWg=
 github.com/dustin/go-humanize v1.1.0/go.mod h1:hc1CvRkJMsgxqjmjMQF3QNRAZBwY8AXBAzKYoSX9sFI=
 github.com/gen2brain/malgo v0.11.28 h1:fuGzm6nOz/3cDNSeTYO5LmE9B4bRqVj4KZT5WMm39HE=

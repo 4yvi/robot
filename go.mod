@@ -4,7 +4,7 @@ go 1.26.0
 
 require (
 	fyne.io/systray v1.12.2
-	github.com/alphacep/vosk-api/go v0.3.42
+	github.com/alphacep/vosk-api/go v0.3.50
 	github.com/gen2brain/malgo v0.11.28
 	golang.org/x/net v0.63.0
 	gopkg.in/yaml.v3 v3.0.1
