@@ -51,7 +51,7 @@ jobs:
       - name: Fetch libvosk
         shell: bash
         run: bash scripts/fetch-libvosk.sh
-      - uses: goreleaser/goreleaser-action@v6
+      - uses: goreleaser/goreleaser-action@v7
         with:
           version: "~> v2"
           args: release --clean --config ${{ matrix.config }} ${{ github.event_name == 'workflow_dispatch' && '--skip=validate' || '' }}
