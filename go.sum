@@ -1,3 +1,7 @@
+github.com/alphacep/vosk-api/go v0.3.42 h1:1cveMA5+73kxCjAh9Vmm2QroEDkbGlYaQjnmwMLgNl8=
+github.com/alphacep/vosk-api/go v0.3.42/go.mod h1:9X8IJsHnFk/b1xyvjlZifo+ZL5VTAx3LW+JQce/eRcA=
+github.com/alphacep/vosk-api/go v0.3.45 h1:kVRykekkz/32tLzIIxbCckLoetDOXyHW5bIois4Ww8k=
+github.com/alphacep/vosk-api/go v0.3.45/go.mod h1:9X8IJsHnFk/b1xyvjlZifo+ZL5VTAx3LW+JQce/eRcA=
 github.com/gen2brain/malgo v0.11.28 h1:fuGzm6nOz/3cDNSeTYO5LmE9B4bRqVj4KZT5WMm39HE=
 github.com/gen2brain/malgo v0.11.28/go.mod h1:xLVG3ROA33Bzol1quF3e4ehqcFuqh8QK4B8T6LQUs/M=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=

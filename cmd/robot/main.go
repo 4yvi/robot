@@ -7,11 +7,13 @@ import (
 	"io"
 	"log/slog"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"time"
 
 	"github.com/4yvi/robot/internal/audio"
 	"github.com/4yvi/robot/internal/config"
+	"github.com/4yvi/robot/internal/wake"
 )
 
 var version = "dev"
@@ -33,6 +35,8 @@ func main() {
 		fmt.Println("robot", version)
 	case "devices":
 		cmdDevices(cfg)
+	case "listen":
+		cmdListen(cfg)
 	case "record-test":
 		cmdRecordTest(cfg)
 	default:
@@ -100,4 +104,25 @@ func cmdRecordTest(cfg *config.Config) {
 	fatal(err)
 	fmt.Printf("Captured %d samples (peak RMS %.0f). Playing back...\n", len(samples), audio.RMS(samples))
 	fatal(a.Play(context.Background(), audio.EncodeWAV(samples, audio.SampleRate, audio.Channels)))
+}
+
+// cmdListen runs the wake-word loop and beeps on every detection (stage 2 check).
+func cmdListen(cfg *config.Config) {
+	a, err := audio.New(cfg.MicDevice, cfg.SpeakerDevice)
+	fatal(err)
+	defer a.Close()
+	det, err := wake.NewVosk(cfg.ResolvePath(cfg.VoskModelPath), cfg.WakeWord, audio.SampleRate)
+	fatal(err)
+	defer det.Close()
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
+	chunks, err := a.Start(ctx)
+	fatal(err)
+	fmt.Printf("Listening for %q, Ctrl+C to quit\n", cfg.WakeWord)
+	beep := audio.Beep(880, 150)
+	wake.Listen(ctx, det, chunks, func() {
+		slog.Info("wake word detected", "word", cfg.WakeWord)
+		fmt.Println("wake!")
+		go func() { _ = a.Play(ctx, beep) }()
+	})
 }

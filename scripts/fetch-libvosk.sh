@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Downloads libvosk for CI/release builds into ./third_party/vosk
 set -euo pipefail
-VER="0.3.45"
+VER="0.3.42"
 DIR="$(cd "$(dirname "$0")/.." && pwd)/third_party/vosk"
 mkdir -p "$DIR"
 case "$(uname -s)" in

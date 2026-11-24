@@ -7,7 +7,7 @@ $Models = Join-Path $Root "models"
 New-Item -ItemType Directory -Force -Path $Models, "third_party" | Out-Null
 
 $VoskModel = "vosk-model-small-ru-0.22"
-$VoskLib = "vosk-win64-0.3.45"
+$VoskLib = "vosk-win64-0.3.42"
 $WhisperModel = "ggml-small.bin"
 $PiperVer = "2023.11.14-2"
 $VoiceBase = "https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/irina/medium"
@@ -27,7 +27,7 @@ if (-not (Test-Path "$Models\vosk-model-small-ru")) {
 
 Write-Host "==> libvosk"
 if (-not (Test-Path "third_party\vosk\libvosk.dll")) {
-    Get-File "https://github.com/alphacep/vosk-api/releases/download/v0.3.45/$VoskLib.zip" "third_party\vosk.zip"
+    Get-File "https://github.com/alphacep/vosk-api/releases/download/v0.3.42/$VoskLib.zip" "third_party\vosk.zip"
     Expand-Archive "third_party\vosk.zip" -DestinationPath "third_party" -Force
     Rename-Item "third_party\$VoskLib" "vosk"
     Remove-Item "third_party\vosk.zip"
