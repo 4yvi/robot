@@ -1,5 +1,10 @@
 version: "2"
 linters:
   default: standard
+  exclusions:
+    rules:
+      # Best-effort cleanup and console output: ignoring these errors is intentional.
+      - linters: [errcheck]
+        text: "Error return value of .*(Close|Fprint|Fprintf|Fprintln|os\\.Remove).* is not checked"
 run:
   timeout: 5m
