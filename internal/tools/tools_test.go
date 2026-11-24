@@ -24,6 +24,11 @@ func call(r *Registry, name, args string) string {
 	return r.Call(context.Background(), llm.ToolCall{Function: llm.FunctionCall{Name: name, Arguments: args}})
 }
 
+func jsonArgs(k, v string) string {
+	b, _ := json.Marshal(map[string]string{k: v})
+	return string(b)
+}
+
 func TestParseDuckDuckGo(t *testing.T) {
 	page := `<div class="result"><h2><a class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fexample.com%2Fa&rut=x">Заголовок <b>один</b></a></h2>
 <a class="result__snippet" href="x">Описание  первого</a></div>
@@ -74,7 +79,7 @@ func TestFilesTools(t *testing.T) {
 	if out := call(r, "files_search", `{"query":"REPORT"}`); !strings.Contains(out, "report-2026.txt") {
 		t.Fatalf("search: %s", out)
 	}
-	if out := call(r, "file_read", `{"path":"`+filepath.Join(root, "report-2026.txt")+`"}`); out != "содержимое" {
+	if out := call(r, "file_read", jsonArgs("path", filepath.Join(root, "report-2026.txt"))); out != "содержимое" {
 		t.Fatalf("read: %s", out)
 	}
 	if out := call(r, "file_read", `{"path":"/etc/hosts"}`); !strings.HasPrefix(out, "error:") {
