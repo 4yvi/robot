@@ -1,0 +1,43 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+/robot
+/dist/
+*.app/
+*.test
+*.out
+coverage.*
+
+# Go
+vendor/
+go.work
+
+# Local config, data, models (never commit)
+config.yaml
+logs/
+models/
+bin/
+*.db
+*.db-wal
+*.db-shm
+*.wav
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE
+.idea/
+.vscode/
+*.swp

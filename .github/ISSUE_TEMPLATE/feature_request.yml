@@ -1,0 +1,14 @@
+name: Idea
+description: Suggest a feature
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like Robot to do?
+    validations:
+      required: true
+  - type: textarea
+    id: alt
+    attributes:
+      label: Alternatives considered

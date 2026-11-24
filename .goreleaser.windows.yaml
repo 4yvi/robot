@@ -1,0 +1,35 @@
+version: 2
+project_name: robot
+
+builds:
+  - id: robot
+    main: ./cmd/robot
+    binary: robot
+    goos: [windows]
+    goarch: [amd64]
+    env:
+      - CGO_ENABLED=1
+    tags: [vosk]
+    flags: [-trimpath]
+    ldflags:
+      - -s -w -H=windowsgui -X main.version={{ .Version }}
+
+archives:
+  - id: windows
+    formats: [zip]
+    name_template: "robot_{{ .Version }}_windows_{{ .Arch }}"
+    files:
+      - config.example.yaml
+      - prompt.md
+      - README.md
+      - LICENSE
+      - scripts/setup.ps1
+
+checksum:
+  name_template: "checksums_windows.txt"
+
+release:
+  mode: append
+
+changelog:
+  disable: true

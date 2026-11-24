@@ -1,0 +1,66 @@
+version: 2
+project_name: robot
+
+builds:
+  - id: robot-arm64
+    main: ./cmd/robot
+    binary: robot
+    goos: [darwin]
+    goarch: [arm64]
+    env:
+      - CGO_ENABLED=1
+      - CC=clang -arch arm64
+    tags: [vosk]
+    flags: [-trimpath]
+    ldflags: ["-s -w -X main.version={{ .Version }}"]
+    hooks:
+      post: bash scripts/make-app.sh {{ .Path }} {{ .Version }} {{ .Arch }}
+  - id: robot-amd64
+    main: ./cmd/robot
+    binary: robot
+    goos: [darwin]
+    goarch: [amd64]
+    env:
+      - CGO_ENABLED=1
+      - CC=clang -arch x86_64
+    tags: [vosk]
+    flags: [-trimpath]
+    ldflags: ["-s -w -X main.version={{ .Version }}"]
+    hooks:
+      post: bash scripts/make-app.sh {{ .Path }} {{ .Version }} {{ .Arch }}
+
+# make-app.sh writes dist/app/<arch>/Robot.app; the archive packs that bundle.
+archives:
+  - id: macos-arm64
+    ids: [robot-arm64]
+    formats: [zip]
+    name_template: "Robot_{{ .Version }}_macos_arm64"
+    files:
+      - src: "dist/app/arm64/Robot.app/**/*"
+        dst: Robot.app
+        strip_parent: false
+      - config.example.yaml
+      - prompt.md
+      - LICENSE
+      - scripts/setup.sh
+  - id: macos-amd64
+    ids: [robot-amd64]
+    formats: [zip]
+    name_template: "Robot_{{ .Version }}_macos_amd64"
+    files:
+      - src: "dist/app/amd64/Robot.app/**/*"
+        dst: Robot.app
+        strip_parent: false
+      - config.example.yaml
+      - prompt.md
+      - LICENSE
+      - scripts/setup.sh
+
+checksum:
+  name_template: "checksums_macos.txt"
+
+release:
+  mode: append
+
+changelog:
+  disable: true
