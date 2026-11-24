@@ -6,7 +6,8 @@
   "bump-patch-for-minor-pre-major": false,
   "packages": {
     ".": {
-      "changelog-path": "CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md",
+      "release-as": "0.1.0"
     }
   }
 }
